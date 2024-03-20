@@ -83,18 +83,80 @@ architecture test_bench of thunderbird_fsm_tb is
 begin
 	-- PORT MAPS ----------------------------------------
 	
-	
-	--START HERE NEXT TIME I ATTEMPT THIS!!
-	
+    --instantiate the unit under test (UUT)
+    uut: thunderbird_fsm port map (
+        i_clk => w_clk,
+        i_reset => w_reset,
+        i_left => w_left,
+        i_right => w_right,
+        o_lights_L => w_L_lights,
+        o_lights_R => w_R_lights
+    );	
 	-----------------------------------------------------
 	
 	-- PROCESSES ----------------------------------------	
-    -- Clock process ------------------------------------
+    -- Clock process 
+    clk_proc : process
+    begin
+        w_clk <= '0';
+    wait for k_clk_period/2;
+        w_clk <= '1';
+        wait for k_clk_period/2;
+    end process;
     
 	-----------------------------------------------------
 	
 	-- Test Plan Process --------------------------------
+	--simulation process
+	--use ### ns for simulation
 	
+	sim_proc: process
+	begin
+	   --sequential timing
+	   w_reset <= '1';
+	   wait for k_clk_period*1;
+	       assert w_L_lights = "000" report "bad reset" severity failure;
+	       assert w_R_lights = "000" report "bad reset" severity failure;
+	       
+	   w_reset <= '0';
+	   wait for k_clk_period*1;
+	   
+	   --all on
+	   w_left <= '1'; w_right <= '1'; wait for k_clk_period;
+	       assert w_L_lights = "111" report "bad all on" severity failure;
+           assert w_R_lights = "111" report "bad all on" severity failure;
+       
+       --all off after being on
+       w_left <= '0'; w_right <= '0'; wait for k_clk_period;
+            assert w_L_lights = "000" report "bad all off" severity failure;
+            assert w_R_lights = "000" report "bad all off" severity failure;
+            
+       --when no blinker is turned on
+       wait for k_clk_period * 2; -- all lights should stay off
+            assert w_L_lights = "000" report "bad stay off" severity failure;
+            assert w_R_lights = "000" report "bad stay off" severity failure;
+            
+        --right blinker (only one on)
+        w_left <= '0'; w_right <= '1'; wait for k_clk_period;
+            assert w_L_lights = "000" report "bad 1 right on" severity failure;
+            assert w_R_lights = "001" report "bad 1 right on" severity failure;
+            
+        --second right blinker on
+        wait for k_clk_period;
+            assert w_L_lights = "000" report "bad 2 right on" severity failure;
+            assert w_R_lights = "011" report "bad 2 right on" severity failure;
+        
+        --all right blinkers on
+        wait for k_clk_period;
+            assert w_L_lights = "000" report "bad all right on" severity failure;
+            assert w_R_lights = "111" report "bad all right on" severity failure;
+        
+        --all off    
+        wait for k_clk_period;
+            assert w_L_lights = "000" report "bad all off after right sequence" severity failure;
+            assert w_R_lights = "000" report "bad all off after right sequence" severity failure;
 	-----------------------------------------------------	
-	
+	   wait;
+	   end process;
+	   
 end test_bench;
