@@ -142,19 +142,45 @@ begin
             assert w_R_lights = "001" report "bad 1 right on" severity failure;
             
         --second right blinker on
+        w_left <= '0'; w_right <= '0';
         wait for k_clk_period;
             assert w_L_lights = "000" report "bad 2 right on" severity failure;
             assert w_R_lights = "011" report "bad 2 right on" severity failure;
         
         --all right blinkers on
+        w_left <= '1'; w_right <= '0';
         wait for k_clk_period;
             assert w_L_lights = "000" report "bad all right on" severity failure;
             assert w_R_lights = "111" report "bad all right on" severity failure;
         
-        --all off    
+        --all off 
+        w_left <= '0'; w_right <= '0'; wait for k_clk_period;   
         wait for k_clk_period;
             assert w_L_lights = "000" report "bad all off after right sequence" severity failure;
             assert w_R_lights = "000" report "bad all off after right sequence" severity failure;
+            
+       
+       --left blinker (only one on)
+       w_left <= '1'; w_right <= '0'; wait for k_clk_period;
+            assert w_L_lights = "001" report "bad 1 left on" severity failure;
+            assert w_R_lights = "000" report "bad 1 left on" severity failure;
+                        
+       --second left blinker on
+       w_left <= '1'; w_right <= '1';
+       wait for k_clk_period;
+            assert w_L_lights = "011" report "bad 2 left on" severity failure;
+            assert w_R_lights = "000" report "bad 2 left on" severity failure;
+                    
+       --all left blinkers on
+       w_left <= '0'; w_right <= '0';
+       wait for k_clk_period;
+            assert w_L_lights = "111" report "bad all left on" severity failure;
+            assert w_R_lights = "000" report "bad all left on" severity failure;
+                    
+       --all off    
+       wait for k_clk_period;
+            assert w_L_lights = "000" report "bad all off after left sequence" severity failure;
+            assert w_R_lights = "000" report "bad all off after left sequence" severity failure;
 	-----------------------------------------------------	
 	   wait;
 	   end process;
